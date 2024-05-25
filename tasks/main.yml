@@ -1,0 +1,21 @@
+---
+- name: Include version-specific variables for Ubuntu
+  include_vars: "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+  when: ansible_distribution == 'Ubuntu'
+
+# See: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199 and
+# https://github.com/geerlingguy/ansible-role-java/issues/64
+- name: Ensure 'man' directory exists.
+  file:  # noqa 208
+    path: /usr/share/man/man1
+    state: directory
+    mode: 0755
+  when:
+    - ansible_distribution == 'Ubuntu'
+    - ansible_distribution_major_version | int >= 18
+
+- name: Install java JDK
+  apt:
+    name: "{{ java_packages }}"
+    state: present
+    update_cache: yes
